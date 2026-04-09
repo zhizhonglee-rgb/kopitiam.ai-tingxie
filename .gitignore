@@ -1,0 +1,7 @@
+node_modules/
+dist/
+argv.json
+extensions/
+.gemini/
+.env
+firepit-log.txt
