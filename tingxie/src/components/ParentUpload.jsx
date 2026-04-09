@@ -20,9 +20,13 @@ export default function ParentUpload({ onStart, initialWords }) {
   };
 
   const getCleanWords = () => {
-    // Extract only Chinese characters
-    const chineseChars = inputText.match(/[\u4e00-\u9fa5]/g) || [];
-    return chineseChars;
+    if (!inputText) return [];
+    // Split by comma or newline
+    const phrases = inputText.split(/[,\n，]+/).map(p => p.trim()).filter(p => p.length > 0);
+    // Keep phrases that contain Chinese characters and strip non-chinese parts
+    return phrases
+      .filter(p => /[\u4e00-\u9fa5]/.test(p))
+      .map(p => p.replace(/[^\u4e00-\u9fa5]/g, ''));
   };
 
   const words = getCleanWords();

@@ -5,14 +5,15 @@ import { Volume2, ChevronRight, CheckCircle2, ArrowLeft } from 'lucide-react';
 export default function StudentQuiz({ words, onFinish }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [status, setStatus] = useState('drawing'); // 'drawing', 'success', 'finished'
-  const canvasRef = useRef(null);
-  const writerRef = useRef(null);
+  const canvasContainerRef = useRef(null);
+  const writersRef = useRef([]);
+  const [completedChars, setCompletedChars] = useState(new Set());
 
-  const currentWord = words[currentIndex];
+  const currentPhrase = words[currentIndex];
 
   const playAudio = () => {
-    if (!currentWord) return;
-    const utterance = new SpeechSynthesisUtterance(currentWord);
+    if (!currentPhrase) return;
+    const utterance = new SpeechSynthesisUtterance(currentPhrase);
     utterance.lang = 'zh-CN';
     utterance.rate = 0.8; // slightly slower for spelling practice
     window.speechSynthesis.speak(utterance);
@@ -23,42 +24,59 @@ export default function StudentQuiz({ words, onFinish }) {
       // Auto-play audio when word changes
       playAudio();
 
-      if (writerRef.current) {
-        writerRef.current.setCharacter(currentWord);
-      } else {
-        // Initialize HanziWriter on first load
-        writerRef.current = HanziWriter.create(canvasRef.current, currentWord, {
+      const chars = currentPhrase.split('');
+      setCompletedChars(new Set());
+      setStatus('drawing');
+      
+      if (canvasContainerRef.current) {
+        canvasContainerRef.current.innerHTML = '';
+      }
+      writersRef.current = [];
+
+      chars.forEach((char, i) => {
+        const div = document.createElement('div');
+        div.className = 'hanzi-canvas';
+        div.style.width = '300px';
+        div.style.height = '300px';
+        if (canvasContainerRef.current) {
+          canvasContainerRef.current.appendChild(div);
+        }
+
+        const writer = HanziWriter.create(div, char, {
           width: 300,
           height: 300,
           padding: 20,
-          showCharacter: false, // hide character for spelling practice
-          showOutline: false,   // hide outline
+          showCharacter: false, 
+          showOutline: false,   
           strokeAnimationSpeed: 1,
           delayBetweenStrokes: 50,
         });
-      }
 
-      setStatus('drawing');
-      
-      // Start the quiz
-      writerRef.current.quiz({
-        onMistake: (strokeData) => {
-          // Could play error sound or flash red
-        },
-        onComplete: (summaryData) => {
-          setStatus('success');
-          // When done tracing correctly, optionally show character
-          writerRef.current.showCharacter({
-            duration: 500
-          });
-        }
+        writer.quiz({
+          onMistake: (strokeData) => {
+            // Could play error sound or flash red
+          },
+          onComplete: (summaryData) => {
+            writer.showCharacter({ duration: 500 });
+            setCompletedChars(prev => {
+              const next = new Set(prev);
+              next.add(i);
+              if (next.size === chars.length) {
+                setStatus('success');
+              }
+              return next;
+            });
+          }
+        });
+
+        writersRef.current.push(writer);
       });
+
     } else if (currentIndex >= words.length && words.length > 0) {
       setStatus('finished');
     }
 
-    // Cleanup: we don't destroy HanziWriter, just recycle it or hide it
-  }, [currentIndex, words, currentWord]);
+  }, [currentIndex, words, currentPhrase]);
 
   const handleNext = () => {
     setCurrentIndex(prev => prev + 1);
@@ -108,9 +126,7 @@ export default function StudentQuiz({ words, onFinish }) {
         )}
       </div>
 
-      <div className="canvas-container">
-        {/* The HanziWriter will attach its SVG here */}
-        <div ref={canvasRef} className="hanzi-canvas" />
+      <div className="canvas-container" style={{ flexWrap: 'wrap', gap: '1rem' }} ref={canvasContainerRef}>
       </div>
 
       <div className="controls">

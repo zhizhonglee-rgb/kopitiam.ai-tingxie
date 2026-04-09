@@ -20,7 +20,7 @@ function App() {
     <div className="glass-panel" style={{ width: '100%' }}>
       <h1 className="title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
         <Sparkles size={36} color="#818cf8" />
-        Tingxie Magic
+        听写 Magic
       </h1>
       <p className="subtitle">Interactive Chinese Spelling Practice</p>
       
