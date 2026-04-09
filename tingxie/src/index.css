@@ -143,15 +143,51 @@ h1, h2, h3 {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin: 2rem 0;
   position: relative;
 }
 
-.hanzi-canvas {
-  background: #fff;
+.drawing-wrapper {
   border-radius: 16px;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  border: 2px solid var(--card-border);
+  background: rgba(0, 0, 0, 0.25);
+  transition: border-color 0.3s ease;
+}
+
+.drawing-wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.drawing-canvas {
+  display: block;
+  width: 280px;
+  height: 280px;
   cursor: crosshair;
+  touch-action: none;
+}
+
+.answer-section {
+  text-align: center;
+  margin: 1rem 0;
+  animation: fade-in 0.4s ease-out;
+}
+
+.answer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.answer-char {
+  width: 120px;
+  height: 120px;
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 12px;
 }
 
 .controls {
