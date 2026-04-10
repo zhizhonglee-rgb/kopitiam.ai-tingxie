@@ -171,28 +171,30 @@ export default function StudentQuiz({ words, onFinish }) {
 
   const handleCheck = () => {
     setStatus('revealed');
-
-    if (answerContainerRef.current) {
-      answerContainerRef.current.innerHTML = '';
-      const chars = currentPhrase.split('');
-
-      chars.forEach((char) => {
-        const div = document.createElement('div');
-        div.className = 'answer-char';
-        answerContainerRef.current.appendChild(div);
-
-        const writer = HanziWriter.create(div, char, {
-          width: 120,
-          height: 120,
-          padding: 10,
-          strokeColor: '#4ade80',
-          strokeAnimationSpeed: 1.5,
-          delayBetweenStrokes: 100,
-        });
-        writer.animateCharacter();
-      });
-    }
   };
+
+  // Populate answer container after it renders
+  useEffect(() => {
+    if (status !== 'revealed' || !answerContainerRef.current) return;
+    answerContainerRef.current.innerHTML = '';
+    const chars = currentPhrase.split('');
+
+    chars.forEach((char) => {
+      const div = document.createElement('div');
+      div.className = 'answer-char';
+      answerContainerRef.current.appendChild(div);
+
+      const writer = HanziWriter.create(div, char, {
+        width: 120,
+        height: 120,
+        padding: 10,
+        strokeColor: '#4ade80',
+        strokeAnimationSpeed: 1.5,
+        delayBetweenStrokes: 100,
+      });
+      writer.animateCharacter();
+    });
+  }, [status, currentPhrase]);
 
   const handleNext = () => {
     setCurrentIndex(prev => prev + 1);
@@ -236,17 +238,22 @@ export default function StudentQuiz({ words, onFinish }) {
 
       <div className="status-text">
         {status === 'revealed' ? (
-          <span className="status-success">Correct answer:</span>
+          <span className="status-success">Compare your answer below</span>
         ) : (
           <span style={{ color: 'var(--text-secondary)' }}>Draw the character below</span>
         )}
       </div>
+
+      {status === 'revealed' && (
+        <div className="comparison-label">Your Answer</div>
+      )}
 
       <div className="canvas-container" ref={canvasContainerRef}>
       </div>
 
       {status === 'revealed' && (
         <div className="answer-section">
+          <div className="comparison-label correct">Correct Answer</div>
           <div className="answer-container" ref={answerContainerRef}></div>
         </div>
       )}
